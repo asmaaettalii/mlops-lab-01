@@ -1,25 +1,20 @@
 name: MLOps CI/CD manifest
 
-
 on:
   push:
     branches: ["main"]
   pull_request:
 
-
 jobs:
   ci:
     runs-on: ubuntu-latest
 
-
     steps:
       - uses: actions/checkout@v4
-
 
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ vars.PY_VERSION }}
-
 
       - name: Cache pip
         uses: actions/cache@v4
@@ -29,12 +24,10 @@ jobs:
           restore-keys: |
             pip-${{ runner.os }}-${{ vars.PY_VERSION }}-
 
-
       - name: Installer dépendances
         run: |
           pip install -U pip
           pip install dvc pandas numpy scikit-learn joblib
-
 
       - name: Restaurer cache DVC
         uses: actions/cache@v4
@@ -44,18 +37,14 @@ jobs:
           restore-keys: |
             dvc-${{ runner.os }}-${{ vars.PY_VERSION }}-
 
-
       - name: Afficher le DAG DVC
         run: dvc dag
-
 
       - name: Générer données brutes
         run: python src/generate_data.py
 
-
       - name: Exécuter pipeline ML via DVC
         run: dvc repro
-
 
       - name: Vérifier métriques (Quality Gate F1)
         run: |
@@ -71,7 +60,6 @@ jobs:
           print("Quality Gate validé")
           EOF
 
-
       - name: Upload artefacts ML
         uses: actions/upload-artifact@v4
         with:
@@ -81,23 +69,19 @@ jobs:
             registry/
             reports/
 
-
   cd:
     needs: ci
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
-
     steps:
       - uses: actions/checkout@v4
-
 
       - name: Télécharger artefacts validés
         uses: actions/download-artifact@v4
         with:
           name: ml-artifacts
           path: release_artifacts
-
 
       - name: CD simulé (déploiement SSH)
         run: |
